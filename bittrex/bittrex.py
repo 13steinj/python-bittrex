@@ -52,8 +52,7 @@ CONDITIONTYPE_STOP_LOSS_PERCENTAGE = 'STOP_LOSS_PERCENTAGE'
 API_V1_1 = 'v1.1'
 API_V2_0 = 'v2.0'
 
-BASE_URL_V1_1 = 'https://bittrex.com/api/v1.1{path}?'
-BASE_URL_V2_0 = 'https://bittrex.com/api/v2.0{path}?'
+BASE_URL = 'https://bittrex.com/api/{api_version}/{path}?'
 
 PROTECTION_PUB = 'pub'  # public methods
 PROTECTION_PRV = 'prv'  # authenticated methods
@@ -83,7 +82,7 @@ class Bittrex(object):
     Used for requesting Bittrex with API key and API secret
     """
 
-    def __init__(self, api_key, api_secret, calls_per_second=1, dispatch=using_requests, api_version=API_V1_1):
+    def __init__(self, api_key=None, api_secret=None, calls_per_second=1, dispatch=using_requests, api_version=API_V1_1):
         self.api_key = str(api_key) if api_key is not None else ''
         self.api_secret = str(api_secret) if api_secret is not None else ''
         self.dispatch = dispatch
@@ -135,8 +134,7 @@ class Bittrex(object):
         if self.api_version not in path_dict:
             raise Exception('method call not available under API version {}'.format(self.api_version))
 
-        request_url = BASE_URL_V2_0 if self.api_version == API_V2_0 else BASE_URL_V1_1
-        request_url = request_url.format(path=path_dict[self.api_version])
+        request_url = BASE_URL.format(api_version=self.api_version, path=path_dict[self.api_version])
 
         nonce = str(int(time.time() * 1000))
 
@@ -191,8 +189,8 @@ class Bittrex(object):
         :rtype : dict
         """
         return self._api_query(path_dict={
-            API_V1_1: '/public/getmarkets',
-            API_V2_0: '/pub/Markets/GetMarkets'
+            API_V1_1: 'public/getmarkets',
+            API_V2_0: 'pub/Markets/GetMarkets'
         }, protection=PROTECTION_PUB)
 
     def get_currencies(self):
@@ -208,8 +206,8 @@ class Bittrex(object):
         :rtype : dict
         """
         return self._api_query(path_dict={
-            API_V1_1: '/public/getcurrencies',
-            API_V2_0: '/pub/Currencies/GetCurrencies'
+            API_V1_1: 'public/getcurrencies',
+            API_V2_0: 'pub/Currencies/GetCurrencies'
         }, protection=PROTECTION_PUB)
 
     def get_ticker(self, market):
@@ -226,7 +224,7 @@ class Bittrex(object):
         :rtype : dict
         """
         return self._api_query(path_dict={
-            API_V1_1: '/public/getticker',
+            API_V1_1: 'public/getticker',
         }, options={'market': market}, protection=PROTECTION_PUB)
 
     def get_market_summaries(self):
@@ -241,8 +239,8 @@ class Bittrex(object):
         :rtype : dict
         """
         return self._api_query(path_dict={
-            API_V1_1: '/public/getmarketsummaries',
-            API_V2_0: '/pub/Markets/GetMarketSummaries'
+            API_V1_1: 'public/getmarketsummaries',
+            API_V2_0: 'pub/Markets/GetMarketSummaries'
         }, protection=PROTECTION_PUB)
 
     def get_marketsummary(self, market):
@@ -260,8 +258,8 @@ class Bittrex(object):
         :rtype : dict
         """
         return self._api_query(path_dict={
-            API_V1_1: '/public/getmarketsummary',
-            API_V2_0: '/pub/Market/GetMarketSummary'
+            API_V1_1: 'public/getmarketsummary',
+            API_V2_0: 'pub/Market/GetMarketSummary'
         }, options={'market': market, 'marketname': market}, protection=PROTECTION_PUB)
 
     def get_orderbook(self, market, depth_type=BOTH_ORDERBOOK):
@@ -284,8 +282,8 @@ class Bittrex(object):
         :rtype : dict
         """
         return self._api_query(path_dict={
-            API_V1_1: '/public/getorderbook',
-            API_V2_0: '/pub/Market/GetMarketOrderBook'
+            API_V1_1: 'public/getorderbook',
+            API_V2_0: 'pub/Market/GetMarketOrderBook'
         }, options={'market': market, 'marketname': market, 'type': depth_type}, protection=PROTECTION_PUB)
 
     def get_market_history(self, market):
@@ -317,8 +315,8 @@ class Bittrex(object):
         :rtype : dict
         """
         return self._api_query(path_dict={
-            API_V1_1: '/public/getmarkethistory',
-            API_V2_0: '/pub/Market/GetMarketHistory'
+            API_V1_1: 'public/getmarkethistory',
+            API_V2_0: 'pub/Market/GetMarketHistory'
         }, options={'market': market, 'marketname': market}, protection=PROTECTION_PUB)
 
     def buy_limit(self, market, quantity, rate):
@@ -342,7 +340,7 @@ class Bittrex(object):
         :rtype : dict
         """
         return self._api_query(path_dict={
-            API_V1_1: '/market/buylimit',
+            API_V1_1: 'market/buylimit',
         }, options={'market': market,
                     'quantity': quantity,
                     'rate': rate}, protection=PROTECTION_PRV)
@@ -368,7 +366,7 @@ class Bittrex(object):
         :rtype : dict
         """
         return self._api_query(path_dict={
-            API_V1_1: '/market/selllimit',
+            API_V1_1: 'market/selllimit',
         }, options={'market': market,
                     'quantity': quantity,
                     'rate': rate}, protection=PROTECTION_PRV)
@@ -387,8 +385,8 @@ class Bittrex(object):
         :rtype : dict
         """
         return self._api_query(path_dict={
-            API_V1_1: '/market/cancel',
-            API_V2_0: '/key/market/cancel'
+            API_V1_1: 'market/cancel',
+            API_V2_0: 'key/market/cancel'
         }, options={'uuid': uuid, 'orderid': uuid}, protection=PROTECTION_PRV)
 
     def get_open_orders(self, market=None):
@@ -406,8 +404,8 @@ class Bittrex(object):
         :rtype : dict
         """
         return self._api_query(path_dict={
-            API_V1_1: '/market/getopenorders',
-            API_V2_0: '/key/market/getopenorders'
+            API_V1_1: 'market/getopenorders',
+            API_V2_0: 'key/market/getopenorders'
         }, options={'market': market, 'marketname': market} if market else None, protection=PROTECTION_PRV)
 
     def get_balances(self):
@@ -435,8 +433,8 @@ class Bittrex(object):
         :rtype : dict
         """
         return self._api_query(path_dict={
-            API_V1_1: '/account/getbalances',
-            API_V2_0: '/key/balance/getbalances'
+            API_V1_1: 'account/getbalances',
+            API_V2_0: 'key/balance/getbalances'
         }, protection=PROTECTION_PRV)
 
     def get_balance(self, currency):
@@ -464,8 +462,8 @@ class Bittrex(object):
         :rtype : dict
         """
         return self._api_query(path_dict={
-            API_V1_1: '/account/getbalance',
-            API_V2_0: '/key/balance/getbalance'
+            API_V1_1: 'account/getbalance',
+            API_V2_0: 'key/balance/getbalance'
         }, options={'currency': currency, 'currencyname': currency}, protection=PROTECTION_PRV)
 
     def get_deposit_address(self, currency):
@@ -482,8 +480,8 @@ class Bittrex(object):
         :rtype : dict
         """
         return self._api_query(path_dict={
-            API_V1_1: '/account/getdepositaddress',
-            API_V2_0: '/key/balance/getdepositaddress'
+            API_V1_1: 'account/getdepositaddress',
+            API_V2_0: 'key/balance/getdepositaddress'
         }, options={'currency': currency, 'currencyname': currency}, protection=PROTECTION_PRV)
 
     def withdraw(self, currency, quantity, address):
@@ -504,8 +502,8 @@ class Bittrex(object):
         :rtype : dict
         """
         return self._api_query(path_dict={
-            API_V1_1: '/account/withdraw',
-            API_V2_0: '/key/balance/withdrawcurrency'
+            API_V1_1: 'account/withdraw',
+            API_V2_0: 'key/balance/withdrawcurrency'
         }, options={'currency': currency, 'quantity': quantity, 'address': address}, protection=PROTECTION_PRV)
 
     def get_order_history(self, market=None):
@@ -523,8 +521,8 @@ class Bittrex(object):
         :rtype : dict
         """
         return self._api_query(path_dict={
-            API_V1_1: '/account/getorderhistory',
-            API_V2_0: '/key/orders/getorderhistory'
+            API_V1_1: 'account/getorderhistory',
+            API_V2_0: 'key/orders/getorderhistory'
         }, options={'market': market, 'marketname': market} if market else None, protection=PROTECTION_PRV)
 
     def get_order(self, uuid):
@@ -541,8 +539,8 @@ class Bittrex(object):
         :rtype : dict
         """
         return self._api_query(path_dict={
-            API_V1_1: '/account/getorder',
-            API_V2_0: '/key/orders/getorder'
+            API_V1_1: 'account/getorder',
+            API_V2_0: 'key/orders/getorder'
         }, options={'uuid': uuid, 'orderid': uuid}, protection=PROTECTION_PRV)
 
     def get_withdrawal_history(self, currency=None):
@@ -560,8 +558,8 @@ class Bittrex(object):
         """
 
         return self._api_query(path_dict={
-            API_V1_1: '/account/getwithdrawalhistory',
-            API_V2_0: '/key/balance/getwithdrawalhistory'
+            API_V1_1: 'account/getwithdrawalhistory',
+            API_V2_0: 'key/balance/getwithdrawalhistory'
         }, options={'currency': currency, 'currencyname': currency} if currency else None,
             protection=PROTECTION_PRV)
 
@@ -579,8 +577,8 @@ class Bittrex(object):
         :rtype : dict
         """
         return self._api_query(path_dict={
-            API_V1_1: '/account/getdeposithistory',
-            API_V2_0: '/key/balance/getdeposithistory'
+            API_V1_1: 'account/getdeposithistory',
+            API_V2_0: 'key/balance/getdeposithistory'
         }, options={'currency': currency, 'currencyname': currency} if currency else None,
             protection=PROTECTION_PRV)
 
@@ -613,7 +611,7 @@ class Bittrex(object):
         :return:
         """
         return self._api_query(path_dict={
-            API_V2_0: '/pub/Currencies/GetWalletHealth'
+            API_V2_0: 'pub/Currencies/GetWalletHealth'
         }, protection=PROTECTION_PUB)
 
     def get_balance_distribution(self):
@@ -627,7 +625,7 @@ class Bittrex(object):
         :return:
         """
         return self._api_query(path_dict={
-            API_V2_0: '/pub/Currency/GetBalanceDistribution'
+            API_V2_0: 'pub/Currency/GetBalanceDistribution'
         }, protection=PROTECTION_PUB)
 
     def get_pending_withdrawals(self, currency=None):
@@ -644,7 +642,7 @@ class Bittrex(object):
         :rtype : list
         """
         return self._api_query(path_dict={
-            API_V2_0: '/key/balance/getpendingwithdrawals'
+            API_V2_0: 'key/balance/getpendingwithdrawals'
         }, options={'currencyname': currency} if currency else None,
             protection=PROTECTION_PRV)
 
@@ -662,7 +660,7 @@ class Bittrex(object):
         :rtype : list
         """
         return self._api_query(path_dict={
-            API_V2_0: '/key/balance/getpendingdeposits'
+            API_V2_0: 'key/balance/getpendingdeposits'
         }, options={'currencyname': currency} if currency else None,
             protection=PROTECTION_PRV)
 
@@ -680,7 +678,7 @@ class Bittrex(object):
         :rtype : dict
         """
         return self._api_query(path_dict={
-            API_V2_0: '/key/balance/getpendingdeposits'
+            API_V2_0: 'key/balance/getpendingdeposits'
         }, options={'currencyname': currency}, protection=PROTECTION_PRV)
 
     def trade_sell(self, market=None, order_type=None, quantity=None, rate=None, time_in_effect=None,
@@ -712,7 +710,7 @@ class Bittrex(object):
         :return:
         """
         return self._api_query(path_dict={
-            API_V2_0: '/key/market/tradesell'
+            API_V2_0: 'key/market/tradesell'
         }, options={
             'marketname': market,
             'ordertype': order_type,
@@ -752,7 +750,7 @@ class Bittrex(object):
         :return:
         """
         return self._api_query(path_dict={
-            API_V2_0: '/key/market/tradebuy'
+            API_V2_0: 'key/market/tradebuy'
         }, options={
             'marketname': market,
             'ordertype': order_type,
@@ -796,7 +794,7 @@ class Bittrex(object):
         """
 
         return self._api_query(path_dict={
-            API_V2_0: '/pub/market/GetTicks'
+            API_V2_0: 'pub/market/GetTicks'
         }, options={
             'marketName': market, 'tickInterval': tick_interval
         }, protection=PROTECTION_PUB)
